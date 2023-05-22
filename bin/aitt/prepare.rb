@@ -14,7 +14,7 @@ if ARGV.length < 2
   echo "from the sheet."
   echo ""
   echo "It will remove columns that are empty. It expects the project link url"
-  echo "in the first column. That header will always be called 'student'."
+  echo "in the first column. That header will always be called 'project'."
   echo ""
   echo "The rest of the headers for the resulting CSV will be copied from the"
   echo "provided google sheet data."
@@ -25,20 +25,23 @@ if ARGV.length < 2
 end
 
 # We want to generate a CSV of expected grades from the google sheet
-tokens = []
+pairs = []
 csv_data = CSV.generate do |csv|
   headers = ['student']
   headers_added = false
   CSV.foreach(ARGV[0], headers: true, col_sep: "\t") do |row|
     # Get the student project link
-    project_link = row.first.last
+    project_link = row['project']
+    student_id = row['student']
 
     # Get the project id
-    project_link = project_link.match(/\/([^\/]+)\/view/)[1]
-    tokens << project_link
-    new_row = [project_link]
+    project_id = project_link.match(/\/([^\/]+)\/view/)[1]
+    pairs << [student_id, project_id]
+    new_row = [student_id]
 
-    row.drop(1).each do |tuple|
+    puts row.inspect
+
+    row.drop(2).each do |tuple|
       header = tuple.first
       score = tuple.last
       next if score == "" || score.nil?
@@ -63,15 +66,15 @@ FileUtils.mkdir_p('sources')
 
 # Download source data, if we need to
 REMOTE_URL = ENV['REMOTE_URL'] || 'https://studio.code.org'
-tokens.each do |channel|
-  source_url = "#{REMOTE_URL}/v3/sources/#{channel}/main.json"
-  if File.exist?("sources/#{channel}.js")
-    puts "[GET] #{source_url} (EXISTS)"
+pairs.each do |student_id, project_id|
+  source_url = "#{REMOTE_URL}/v3/sources/#{project_id}/main.json"
+  if File.exist?("sources/#{student_id}.js")
+    puts "[GET] #{student_id} (EXISTS)"
     next
   end
 
   puts "[GET] #{source_url}"
   response = HTTParty.get(source_url, timeout: 120)
   metadata = JSON.parse(response.body)
-  File.write("sources/#{channel}.js", metadata["source"], mode: "w+")
+  File.write("sources/#{student_id}.js", metadata["source"], mode: "w+")
 end
