@@ -6,6 +6,7 @@ class EvaluateRubricJob < ApplicationJob
 
   S3_AI_BUCKET = 'cdo-ai'.freeze
   STUB_AI_PROXY_PATH = '/api/test/ai_proxy'.freeze
+  S3_LESSON_PATH = 'teaching_assistant/lessons'.freeze
 
   # 2D Map from unit name and level name, to the name of the lesson files in S3
   # which will be used for AI evaluation.
@@ -290,12 +291,12 @@ class EvaluateRubricJob < ApplicationJob
   end
 
   private def read_file_from_s3(lesson_s3_name, key_suffix)
-    key = "teaching_assistant/lessons/#{lesson_s3_name}/#{key_suffix}"
+    key = "#{S3_LESSON_PATH}/#{lesson_s3_name}/#{key_suffix}"
     s3_client.get_object(bucket: S3_AI_BUCKET, key: key)[:body].read
   end
 
   private def read_examples(lesson_s3_name)
-    prefix = "teaching_assistant/lessons/#{lesson_s3_name}/examples/"
+    prefix = "#{S3_LESSON_PATH}/#{lesson_s3_name}/examples/"
     response = s3_client.list_objects_v2(bucket: S3_AI_BUCKET, prefix: prefix)
     file_names = response.contents.map(&:key)
     file_names = file_names.map {|name| name.gsub(prefix, '')}
