@@ -7,14 +7,15 @@ import {
 import moduleStyles from './modal-function-editor.module.scss';
 import classNames from 'classnames';
 import Button from '@cdo/apps/templates/Button';
-import msg from '@cdo/locale';
 import {useSelector} from 'react-redux';
 import color from '@cdo/apps/util/color';
+const msg = require('@cdo/locale');
 
 export default function ModalFunctionEditor() {
-  const isRtl = useSelector(state => state.isRtl);
+  const isRtl = useSelector((state: {isRtl: boolean}) => state.isRtl);
   const buttonSize = Button.ButtonSize.narrow;
   // functionEditor.js handles setting the click handlers on these buttons.
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const emptyOnClick = () => {};
   const toolbarStyles = classNames(
     'toolbar',
