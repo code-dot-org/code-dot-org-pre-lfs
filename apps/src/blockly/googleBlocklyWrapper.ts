@@ -145,7 +145,9 @@ const BlocklyWrapper = function (
  * If this needs to be called multiple times (for example, in tests), call
  * Blockly.navigationController.dispose() before calling this function again.
  */
-function initializeBlocklyWrapper(blocklyInstance: typeof GoogleBlockly) {
+export default function initializeBlocklyWrapper(
+  blocklyInstance: typeof GoogleBlockly
+) {
   const blocklyWrapper = new BlocklyWrapper(blocklyInstance);
 
   blocklyWrapper.setInfiniteLoopTrap = function () {
@@ -784,5 +786,3 @@ function initializeBlocklyWrapper(blocklyInstance: typeof GoogleBlockly) {
 
   return blocklyWrapper;
 }
-
-module.exports = initializeBlocklyWrapper;
